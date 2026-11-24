@@ -1,0 +1,8 @@
+{
+  "id": "badref",
+  "name": "Undefined input",
+  "inputs": [],
+  "steps": [
+    { "do": "addEffect", "effect": "absent.glitch", "set": { "intensity": "$nope" } }
+  ]
+}

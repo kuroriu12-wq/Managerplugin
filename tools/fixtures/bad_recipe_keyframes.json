@@ -1,0 +1,7 @@
+{
+  "id": "badkf",
+  "name": "Mismatched keyframes",
+  "steps": [
+    { "do": "keyframeEffectParam", "effect": "absent.glitch", "param": "intensity", "at": [0, 0.3], "values": [1] }
+  ]
+}

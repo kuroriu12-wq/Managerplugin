@@ -1,0 +1,8 @@
+{
+  "id": "absent.glow",
+  "name": "Reserved id",
+  "version": "1.0",
+  "api": 1,
+  "permissions": [],
+  "contributes": { "recipes": [], "effects": [], "scripts": [] }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "kuep.pulseglow",
+  "name": "Pulse Glow",
+  "version": "1.0",
+  "api": 1,
+  "permissions": [],
+  "contributes": {
+    "recipes": [],
+    "effects": ["pulse"],
+    "scripts": []
+  }
+}

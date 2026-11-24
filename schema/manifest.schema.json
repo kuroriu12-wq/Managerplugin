@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AbsentMotion plugin manifest (host API 1)",
+  "type": "object",
+  "required": ["id", "name", "version", "api", "permissions", "contributes"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(?!absent\\.)[a-z0-9_]+(\\.[a-z0-9_]+)+$",
+      "description": "owner.name, lowercase letters, digits and underscores. The prefix 'absent.' is reserved for built-ins."
+    },
+    "name": { "type": "string", "pattern": "\\S" },
+    "version": { "type": "string", "pattern": "\\S" },
+    "api": {
+      "type": "integer",
+      "const": 1,
+      "description": "Host API version. The app requires an exact match."
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Shown at install. Version 1 of the host grants none."
+    },
+    "contributes": {
+      "type": "object",
+      "properties": {
+        "recipes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/packagePath" },
+          "description": "Paths of recipe JSON files inside the package."
+        },
+        "effects": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_]+$" },
+          "description": "Effect keys. Each needs effects/<key>.json and an entry in effects/index.json."
+        },
+        "scripts": {
+          "type": "array",
+          "maxItems": 0,
+          "items": { "$ref": "#/$defs/packagePath" },
+          "description": "Scripts are not supported yet; the app rejects a package that lists any."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "packagePath": {
+      "type": "string",
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*\\\\)(?!(?:.*/)?\\.\\.(?:/|$)).+$",
+      "description": "Relative path with forward slashes that stays inside the package."
+    }
+  }
+}

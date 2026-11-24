@@ -1,0 +1,12 @@
+{
+  "id": "kuep.shakeintro",
+  "name": "Shake Intro",
+  "version": "1.0",
+  "api": 1,
+  "permissions": [],
+  "contributes": {
+    "recipes": ["recipes/shake.json"],
+    "effects": [],
+    "scripts": []
+  }
+}

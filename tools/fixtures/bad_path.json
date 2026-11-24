@@ -1,0 +1,8 @@
+{
+  "id": "kuep.badpath",
+  "name": "Bad path",
+  "version": "1.0",
+  "api": 1,
+  "permissions": [],
+  "contributes": { "recipes": ["../evil.json"], "effects": [], "scripts": [] }
+}
