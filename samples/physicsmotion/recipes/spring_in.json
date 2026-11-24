@@ -1,0 +1,17 @@
+{
+  "id": "spring_in",
+  "name": "Spring in",
+  "inputs": [
+    { "id": "fromY", "label": "Start above (negative) or below (positive)", "type": "number", "default": -0.4, "min": -2, "max": 2 },
+    { "id": "frequency", "label": "Frequency (Hz)", "type": "number", "default": 2, "min": 0.2, "max": 10 },
+    { "id": "damping", "label": "Damping", "type": "number", "default": 0.25, "min": 0, "max": 0.99 },
+    { "id": "delay", "label": "Delay (seconds)", "type": "number", "default": 0, "min": 0, "max": 60 }
+  ],
+  "steps": [
+    {
+      "do": "addEffect",
+      "effect": "kuep.physicsmotion.springsettle",
+      "set": { "startY": "$fromY", "frequency": "$frequency", "damping": "$damping", "delay": "$delay" }
+    }
+  ]
+}

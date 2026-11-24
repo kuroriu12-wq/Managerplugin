@@ -103,6 +103,7 @@ pip install jsonschema
 python3 tools/check_samples.py
 python3 tools/pack.py samples/shakeintro out/shakeintro.zip
 python3 tools/pack.py samples/pulseglow out/pulseglow.zip
+python3 tools/pack.py samples/physicsmotion out/physicsmotion.zip
 ```
 
 `check_samples.py` validates every folder in `samples/` against the schemas and checks the rules a schema cannot (`$input` references, matching keyframe lists, listed files exist). It also runs the `tools/fixtures/bad_*.json` files and expects each to be invalid. Exit code 0 means everything behaved as expected.
@@ -110,6 +111,7 @@ python3 tools/pack.py samples/pulseglow out/pulseglow.zip
 ## Layout
 
 - `schema/`: `manifest.schema.json`, `recipe.schema.json`
-- `samples/`: one sample per kind of plugin
-- `tools/`: `pack.py`, `check_samples.py`, `fixtures/`
+- `samples/`: `shakeintro` (recipe), `pulseglow` (effect pack), `physicsmotion` (effect pack plus recipes, see `docs/physicsmotion.md`)
+- `tools/`: `pack.py`, `check_samples.py`, `gen_physicsmotion.py`, `fixtures/`
 - `docs/design.md`: the full design
+- `docs/physicsmotion.md`: the Physics Motion sample and what it can and cannot do

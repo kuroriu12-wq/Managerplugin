@@ -1,0 +1,16 @@
+{
+  "id": "kuep.physicsmotion",
+  "name": "Physics Motion",
+  "version": "1.0",
+  "api": 1,
+  "permissions": [],
+  "contributes": {
+    "recipes": [
+      "recipes/drop_bounce.json",
+      "recipes/spring_in.json",
+      "recipes/pendulum_swing.json"
+    ],
+    "effects": ["bouncedrop", "springsettle", "pendulum"],
+    "scripts": []
+  }
+}

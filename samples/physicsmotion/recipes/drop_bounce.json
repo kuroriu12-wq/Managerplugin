@@ -1,0 +1,17 @@
+{
+  "id": "drop_bounce",
+  "name": "Drop and bounce",
+  "inputs": [
+    { "id": "height", "label": "Drop height (fraction of the screen)", "type": "number", "default": 0.5, "min": 0, "max": 2 },
+    { "id": "bounce", "label": "Bounciness", "type": "number", "default": 0.55, "min": 0, "max": 0.95 },
+    { "id": "squash", "label": "Squash", "type": "number", "default": 0.25, "min": 0, "max": 0.6 },
+    { "id": "delay", "label": "Delay (seconds)", "type": "number", "default": 0, "min": 0, "max": 60 }
+  ],
+  "steps": [
+    {
+      "do": "addEffect",
+      "effect": "kuep.physicsmotion.bouncedrop",
+      "set": { "height": "$height", "bounce": "$bounce", "squash": "$squash", "delay": "$delay" }
+    }
+  ]
+}

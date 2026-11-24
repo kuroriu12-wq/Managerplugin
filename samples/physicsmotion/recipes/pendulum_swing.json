@@ -1,0 +1,16 @@
+{
+  "id": "pendulum_swing",
+  "name": "Pendulum swing",
+  "inputs": [
+    { "id": "swing", "label": "Start angle (degrees, positive is clockwise)", "type": "number", "default": 40, "min": -180, "max": 180 },
+    { "id": "frequency", "label": "Frequency (Hz)", "type": "number", "default": 0.8, "min": 0.1, "max": 6 },
+    { "id": "damping", "label": "Damping", "type": "number", "default": 0.12, "min": 0, "max": 0.99 }
+  ],
+  "steps": [
+    {
+      "do": "addEffect",
+      "effect": "kuep.physicsmotion.pendulum",
+      "set": { "swing": "$swing", "frequency": "$frequency", "damping": "$damping" }
+    }
+  ]
+}
