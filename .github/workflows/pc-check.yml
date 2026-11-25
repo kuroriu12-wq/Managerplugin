@@ -1,0 +1,39 @@
+name: pc-check
+
+on:
+  push:
+    branches: ['spike/**']
+    paths:
+      - 'spikes/pc-check/**'
+      - '.github/workflows/pc-check.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.8.2'
+      - name: Run the QuickJS checks on the desktop JVM
+        working-directory: spikes/pc-check
+        shell: bash
+        run: gradle --no-daemon --stacktrace test
+      - name: List the native libraries inside the jar
+        if: ${{ !cancelled() }}
+        working-directory: spikes/pc-check
+        shell: bash
+        run: |
+          jar=$(gradle --no-daemon -q printQuickJsJar | grep QJS_JAR | head -1 | cut -d= -f2-)
+          echo "jar: $jar"
+          unzip -l "$jar" | grep -v -E '\.class$' | head -60
