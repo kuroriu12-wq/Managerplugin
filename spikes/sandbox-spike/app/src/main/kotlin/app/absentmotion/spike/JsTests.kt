@@ -168,7 +168,13 @@ object JsTests {
             return
         }
         val (pass, text) = c.check(o, host)
-        log("${if (c.info) "INFO" else if (pass) "PASS" else "FAIL"} ${c.name}: $text")
+        log("${if (c.info) "INFO" else if (pass) "PASS" else "FAIL"} ${c.name}: ${compact(text)}")
+    }
+
+    /** First three lines, at most 300 characters: a QuickJS stack overflow trace has thousands of lines. */
+    private fun compact(s: String): String {
+        val joined = s.lines().take(3).joinToString(" | ")
+        return if (joined.length > 300) joined.take(300) + "..." else joined
     }
 
     fun runAll(make: () -> JsEngine, log: (String) -> Unit) {
@@ -177,7 +183,7 @@ object JsTests {
         val cancel = AtomicBoolean(false)
         make().run("leak = 1; 1", 2000, 50_000_000, cancel, Host())
         val second = make().run("typeof leak", 2000, 50_000_000, cancel, Host())
-        log("${if (second.ok && second.value == "undefined") "PASS" else "FAIL"} globalsDoNotLeakBetweenRuns: ${detail(second)}")
+        log("${if (second.ok && second.value == "undefined") "PASS" else "FAIL"} globalsDoNotLeakBetweenRuns: ${compact(detail(second))}")
     }
 
     /** May be killed by the system or freeze the phone for a while: its own button. */

@@ -55,14 +55,15 @@ class RhinoEngine : JsEngine {
             val value = factory.call(ContextAction<String> { cx ->
                 val scope = cx.initSafeStandardObjects()
                 val ctxObj = cx.newObject(scope) as ScriptableObject
-                ScriptableObject.putProperty(ctxObj, "log", fn { args ->
+                val locked = ScriptableObject.READONLY or ScriptableObject.PERMANENT
+                ScriptableObject.defineProperty(ctxObj, "log", fn { args ->
                     host.logs.add(Context.toString(args.getOrNull(0)))
                     Undefined.instance
-                })
-                ScriptableObject.putProperty(ctxObj, "ping", fn {
+                }, locked)
+                ScriptableObject.defineProperty(ctxObj, "ping", fn {
                     host.calls++
                     Undefined.instance
-                })
+                }, locked)
                 ctxObj.sealObject()
                 ScriptableObject.putProperty(scope, "ctx", ctxObj)
                 Context.toString(cx.evaluateString(scope, src, "script", 1, null))
