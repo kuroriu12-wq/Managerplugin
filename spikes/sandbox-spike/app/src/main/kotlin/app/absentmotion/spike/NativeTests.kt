@@ -33,25 +33,42 @@ object NativeTests {
         dl.setReadOnly()
         log("  probe in app process (for comparison):")
         log(Native.probe(app.filesDir.absolutePath).trimEnd())
+        log(try {
+            val p = Runtime.getRuntime().exec(arrayOf("/system/bin/sh", "-c", "id"))
+            "    exec /system/bin/sh: ALLOWED, output: " + p.inputStream.bufferedReader().readText().trim()
+        } catch (t: Throwable) {
+            "    exec /system/bin/sh: blocked ($t)"
+        })
         log("  load .so from a writable file in app storage:")
         log(Native.loadPath(rw.absolutePath).trimEnd())
         log("  load .so from a read-only file in app storage:")
         log(Native.loadPath(ro.absolutePath).trimEnd())
 
         log("== N1 isolated process: what can it reach?")
-        val c1 = IsoClient(app)
+        val c1 = IsoClient(app, "main")
         if (!c1.connect(8000)) {
             log("  FAIL: could not bind the isolated service")
             return
         }
         val probeData = Bundle().apply { putString("dir", app.filesDir.absolutePath) }
         log((c1.call(IsoService.PROBE, probeData, 8000) ?: "  no reply (timeout)").trimEnd())
+        log((c1.call(IsoService.EXEC, Bundle(), 8000) ?: "  no reply (timeout)").trimEnd())
 
         log("== N2 isolated process: load a .so that is not in the APK (passed as a file descriptor)")
         try {
             ParcelFileDescriptor.open(dl, ParcelFileDescriptor.MODE_READ_ONLY).use { pfd ->
                 val b = Bundle().apply { putParcelable("fd", pfd) }
                 log((c1.call(IsoService.LOAD, b, 8000) ?: "  no reply (timeout)").trimEnd())
+            }
+        } catch (t: Throwable) {
+            log("  FAIL: $t")
+        }
+
+        log("== N2b isolated process: copy the .so into a memfd inside the process, then load it")
+        try {
+            ParcelFileDescriptor.open(dl, ParcelFileDescriptor.MODE_READ_ONLY).use { pfd ->
+                val b = Bundle().apply { putParcelable("fd", pfd) }
+                log((c1.call(IsoService.LOAD_MEMFD, b, 8000) ?: "  no reply (timeout)").trimEnd())
             }
         } catch (t: Throwable) {
             log("  FAIL: $t")
@@ -87,7 +104,7 @@ object NativeTests {
         }
 
         log("== N4 watchdog: kill a plugin that spins forever")
-        val c2 = IsoClient(app)
+        val c2 = IsoClient(app, "spinner")
         if (!c2.connect(8000)) {
             log("  FAIL: could not bind a second isolated service")
         } else {
@@ -98,9 +115,10 @@ object NativeTests {
             val dead = c2.died.await(5, TimeUnit.SECONDS)
             val took = SystemClock.elapsedRealtime() - t
             log("  after unbind: process death ${if (dead) "seen after ${took}ms" else "NOT seen within 5000ms"}")
-            val c3 = IsoClient(app)
+            val c3 = IsoClient(app, "fresh")
             val alive = c3.connect(8000) && c3.call(IsoService.PING, Bundle(), 5000) != null
             log("  a new isolated process answers afterwards: $alive")
+            log("  main process: " + c1.call(IsoService.PING, Bundle(), 5000) + " / fresh process: " + c3.call(IsoService.PING, Bundle(), 5000))
             c3.close()
         }
         c1.close()

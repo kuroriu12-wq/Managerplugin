@@ -26,6 +26,8 @@ class IsoService : Service() {
         const val FRAME = 3
         const val SPIN = 4
         const val PING = 5
+        const val LOAD_MEMFD = 6
+        const val EXEC = 7
     }
 
     private val thread = HandlerThread("iso-worker").apply { start() }
@@ -57,6 +59,11 @@ class IsoService : Service() {
             val pfd = msg.data.parcelable<ParcelFileDescriptor>("fd")
             if (pfd == null) "no fd received" else Native.loadPayload(pfd.detachFd())
         }
+        LOAD_MEMFD -> {
+            val pfd = msg.data.parcelable<ParcelFileDescriptor>("fd")
+            if (pfd == null) "no fd received" else Native.loadMemfd(pfd.detachFd())
+        }
+        EXEC -> tryExec()
         FRAME -> {
             val shm = msg.data.parcelable<SharedMemory>("shm")
             if (shm == null) {
@@ -74,6 +81,14 @@ class IsoService : Service() {
         }
         PING -> "pong pid=${Process.myPid()}"
         else -> "unknown message ${msg.what}"
+    }
+
+    private fun tryExec(): String = try {
+        val p = Runtime.getRuntime().exec(arrayOf("/system/bin/sh", "-c", "id"))
+        val text = p.inputStream.bufferedReader().readText().trim()
+        "    exec /system/bin/sh: ALLOWED, output: $text"
+    } catch (t: Throwable) {
+        "    exec /system/bin/sh: blocked ($t)"
     }
 
     override fun onBind(intent: Intent?): IBinder = messenger.binder

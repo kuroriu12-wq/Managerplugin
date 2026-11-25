@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 #define OUT_SIZE 4096
@@ -140,4 +141,37 @@ Java_app_absentmotion_spike_Native_invert(JNIEnv* env, jobject self, jobject buf
     for (jint i = 0; i < len / 8; i++) {
         q[i] ^= ~(uint64_t)0;
     }
+}
+
+/* Copies the bytes of srcFd into a memfd created in this process, then loads that. */
+JNIEXPORT jstring JNICALL
+Java_app_absentmotion_spike_Native_loadMemfd(JNIEnv* env, jobject self, jint srcFd) {
+    (void)self;
+    char out[OUT_SIZE];
+    out[0] = 0;
+    int mfd = (int)syscall(SYS_memfd_create, "payload", 0);
+    if (mfd < 0) {
+        snprintf(out, OUT_SIZE, "    memfd_create: blocked errno=%d (%s)\n", errno, strerror(errno));
+        return (*env)->NewStringUTF(env, out);
+    }
+    char buf[8192];
+    ssize_t n;
+    long total = 0;
+    lseek(srcFd, 0, SEEK_SET);
+    while ((n = read(srcFd, buf, sizeof buf)) > 0) {
+        if (write(mfd, buf, (size_t)n) != n) break;
+        total += n;
+    }
+    snprintf(out, OUT_SIZE, "    memfd_create: OK, copied %ld bytes\n", total);
+
+    android_dlextinfo info;
+    memset(&info, 0, sizeof info);
+    info.flags = ANDROID_DLEXT_USE_LIBRARY_FD;
+    info.library_fd = mfd;
+    try_open(out, "android_dlopen_ext(memfd)", android_dlopen_ext("payload_from_memfd.so", RTLD_NOW, &info));
+
+    char path[64];
+    snprintf(path, sizeof path, "/proc/self/fd/%d", mfd);
+    try_open(out, "dlopen(/proc/self/fd/memfd)", dlopen(path, RTLD_NOW));
+    return (*env)->NewStringUTF(env, out);
 }

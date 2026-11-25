@@ -10,6 +10,7 @@ object Native {
     external fun probe(appFilesDir: String): String
     external fun loadPayload(fd: Int): String
     external fun loadPath(path: String): String
+    external fun loadMemfd(srcFd: Int): String
     external fun spin()
     external fun invert(buf: ByteBuffer, len: Int)
 }

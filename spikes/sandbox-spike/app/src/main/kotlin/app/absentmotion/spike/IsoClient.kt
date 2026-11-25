@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -15,7 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 /** Blocking client for IsoService. Use from a background thread only. */
-class IsoClient(private val ctx: Context) {
+class IsoClient(private val ctx: Context, private val instance: String) {
     private val connected = CountDownLatch(1)
     val died = CountDownLatch(1)
 
@@ -42,7 +43,13 @@ class IsoClient(private val ctx: Context) {
     }
 
     fun connect(timeoutMs: Long): Boolean {
-        val ok = ctx.bindService(Intent(ctx, IsoService::class.java), conn, Context.BIND_AUTO_CREATE)
+        val intent = Intent(ctx, IsoService::class.java)
+        // One isolated process per instance name. A plain bindService would share one process between all clients.
+        val ok = if (Build.VERSION.SDK_INT >= 29) {
+            ctx.bindIsolatedService(intent, Context.BIND_AUTO_CREATE, instance, ctx.mainExecutor, conn)
+        } else {
+            ctx.bindService(intent, conn, Context.BIND_AUTO_CREATE)
+        }
         return ok && connected.await(timeoutMs, TimeUnit.MILLISECONDS)
     }
 
