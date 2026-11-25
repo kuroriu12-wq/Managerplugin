@@ -17,6 +17,7 @@ class QuickJsEngine : JsEngine {
             val value = runBlocking {
                 quickJs {
                     evaluationTimeoutMillis = budgetMs
+                    memoryLimit = 64L * 1024 * 1024 // 64 MB, checks that the setting is honoured
                     val inst = this
                     val watcher = Thread {
                         while (!done.get()) {
