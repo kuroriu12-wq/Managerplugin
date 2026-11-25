@@ -12,14 +12,14 @@ class QuickJsEngine : JsEngine {
 
     override fun run(src: String, budgetMs: Long, budgetInstr: Long, cancel: AtomicBoolean, host: Host): Outcome {
         val t0 = System.nanoTime()
-        @Volatile var done = false
+        val done = AtomicBoolean(false)
         return try {
             val value = runBlocking {
                 quickJs {
                     evaluationTimeoutMillis = budgetMs
                     val inst = this
                     val watcher = Thread {
-                        while (!done) {
+                        while (!done.get()) {
                             if (cancel.get()) {
                                 inst.interruptEvaluation()
                                 break
@@ -47,7 +47,7 @@ class QuickJsEngine : JsEngine {
                         evaluate<Any?>("Object.freeze(ctx);")
                         evaluate<Any?>(src, filename = "script")
                     } finally {
-                        done = true
+                        done.set(true)
                     }
                 }
             }
