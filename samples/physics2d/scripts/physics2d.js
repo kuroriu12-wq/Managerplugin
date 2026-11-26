@@ -384,7 +384,7 @@ defineScript({
       spin: input.spin * Math.PI / 180,
       pin: input.pin,
       inherit: input.inherit,
-      probe: 1 / fps,
+      probe: Math.max(1, Math.round(1000 / fps)) / 1000,
       fallbackRadius: input.fallbackRadius * height,
     };
     const walls = [];
