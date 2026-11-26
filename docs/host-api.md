@@ -40,10 +40,12 @@ defineScript({
 | Member | Meaning |
 |---|---|
 | `id`, `kind`, `name`, `locked` | Layer id, kind (`shape`, `text`, `drawing`, `embedScene`, `camera`, `audio`, `nullobj`, `model`, `light`), label, lock state. |
+| `shape` | The shape id for shape layers (for example `.circle`, `.rect`, `.star`), empty text for other kinds. |
 | `start`, `finish` | Scene time in seconds. |
 | `size()` | `{ width, height }` for shape layers, `null` for every other kind. The app has no bounds call for text or media yet. |
 | `position(t)` | `{ x, y }` at `t` seconds after the layer start. |
 | `rotation(t)` | Degrees at `t` seconds after the layer start. |
+| `scale(t)` | `{ x, y }` scale factor at `t` seconds after the layer start. |
 | `setKeys(property, times, values)` | Replace the keyframes of `"position"`, `"rotation"`, `"scale"` or `"opacity"`. |
 | `addEffect(effectId, { param: value })` | Add an effect to the end of the stack, with optional parameter values. |
 | `setEffectParam(effectId, param, value)` | Set a parameter on the last instance of the effect. |

@@ -1,0 +1,12 @@
+{
+  "id": "kuep.physics2d",
+  "name": "Physics 2D",
+  "version": "1.0",
+  "api": 2,
+  "permissions": [],
+  "contributes": {
+    "recipes": [],
+    "effects": [],
+    "scripts": ["scripts/physics2d.js"]
+  }
+}

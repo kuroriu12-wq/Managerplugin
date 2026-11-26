@@ -93,6 +93,22 @@ def script_problems(path):
     return problems
 
 
+APP_COPIES = ROOT.parent / "absentmotion-test-plugin" / "android" / "src" / "test" / "resources" / "plugins"
+
+
+def copy_problems(name, folder):
+    copy = APP_COPIES / name
+    if not copy.is_dir():
+        return []
+    problems = []
+    for path in sorted(folder.rglob("*")):
+        if path.is_file():
+            twin = copy / path.relative_to(folder)
+            if not twin.is_file() or twin.read_bytes() != path.read_bytes():
+                problems.append(f"{path.relative_to(folder)} differs from the app test copy {twin}")
+    return problems
+
+
 def effect_problems(folder, key):
     path = folder / f"{key}.json"
     if not path.is_file():
@@ -159,6 +175,8 @@ def main():
             failed = True
             continue
         problems = manifest_problems(load(manifest_path), sample)
+        if sample.name in {"hello_script", "physics2d"}:
+            problems += copy_problems(sample.name, sample)
         if problems:
             failed = True
             print(f"FAIL {sample.name}")
