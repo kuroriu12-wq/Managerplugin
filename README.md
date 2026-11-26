@@ -2,16 +2,16 @@
 
 Plugin spec, JSON schemas and sample plugins for the AbsentMotion Manager.
 
-Host API version: **1**. The app that loads these plugins lives in `kuroriu12-wq/AbsentMotion-test-plugin`.
+Host API versions: **1** (recipes, effects) and **2** (adds scripts). The app that loads these plugins lives in `kuroriu12-wq/AbsentMotion-test-plugin`.
 
 ## What a plugin is
 
-A `.zip` you install from the Plugins screen in AbsentMotion. It works the same on PC and Android. It holds data only: no compiled or native code. Version 1 supports two kinds of contribution:
+A `.zip` you install from the Plugins screen in AbsentMotion. It works the same on PC and Android. It holds data only: no compiled or native code. It can contribute three kinds of things:
 
 - **Recipes**: a form plus a list of steps that edit the selected layer. One run is one undo step. If any step fails, nothing is changed.
 - **Effect packs**: shader effects (SkSL) that appear in the effect browser next to the built-in ones.
 
-Scripts (`scripts/`) are planned for a later host API and are rejected for now.
+- **Scripts** (host API 2): a JavaScript file that reads the selected layers and writes keyframes and effects, for tools a recipe cannot express (physics, distribution, procedural motion). See `docs/host-api.md` and `samples/hello_script/`.
 
 ## Zip layout
 
@@ -21,6 +21,7 @@ myplugin.zip
   recipes/*.json
   effects/index.json
   effects/<key>.json
+  scripts/*.js
   assets/
 ```
 
@@ -47,11 +48,11 @@ Files go at the zip root, not inside a folder. Paths use `/`. Entries with `..`,
 |---|---|
 | `id` | `owner.name`, lowercase letters, digits, underscores. `absent.` is reserved. Installing an id that exists asks to replace it. |
 | `name`, `version` | Non-empty text. |
-| `api` | The integer `1`. Exact match required. |
-| `permissions` | List of text. Shown at install. Version 1 grants none. |
+| `api` | The integer `1` or `2`. Scripts need `2`. |
+| `permissions` | List of text. Shown at install. Nothing is granted yet. |
 | `contributes.recipes` | Paths of recipe files inside the package. |
 | `contributes.effects` | Effect keys (letters, digits, underscores). Each needs `effects/<key>.json` and an entry in `effects/index.json`. |
-| `contributes.scripts` | Must be empty in version 1. |
+| `contributes.scripts` | Paths of `.js` files inside the package. Needs `api` 2. |
 
 A plugin that fails to load is disabled and shows its error. It never blocks startup.
 

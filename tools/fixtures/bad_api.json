@@ -2,7 +2,7 @@
   "id": "kuep.badapi",
   "name": "Bad API",
   "version": "1.0",
-  "api": 2,
+  "api": 3,
   "permissions": [],
   "contributes": { "recipes": [], "effects": [], "scripts": [] }
 }

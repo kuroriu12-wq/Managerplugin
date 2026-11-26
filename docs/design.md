@@ -65,7 +65,7 @@ myplugin.zip
   manifest.json
   recipes/*.json      (F)
   effects/*.json      (A, same schema as shared/assets/effects, plus .sksl shaders)
-  scripts/main.lua    (B)
+  scripts/main.js     (B)
   assets/             (images, fonts, etc.)
 ```
 
@@ -100,7 +100,7 @@ How rollback works (checked in the code): `Scene` and `Layer` are immutable (`La
 `EditorState.edit {}` takes a function from the current scene to a new scene and pushes one history entry.
 So the runner folds all steps over a copy of the scene and calls `edit { next }` once at the end. A
 failure or a budget overrun just never commits; nothing needs to be aborted. The same rule applies to
-Lua scripts: every host-API edit works on a pending scene that is committed once per user action.
+Scripts: every host-API edit works on a pending scene that is committed once per user action.
 
 ### Layer A: effect packs
 
@@ -118,11 +118,13 @@ backdrop/blur/glyph passes, puppet, particles) stay built-in only.
 
 ### Layer B: scripts
 
-- Engine: Lua through LuaJ (pure JVM, so identical on Android and PC, no native libraries). This is my call.
-- Plugins talk to the app only through a host API: read the scene and selection, edit the scene (same operations as recipe steps), declare panels and forms with data (the app draws them with its own components), show messages.
+Status: built (host API 2). Revised from the first draft: the language is JavaScript and the engine is QuickJS (`io.github.dokar3:quickjs-kt`), chosen after phone tests on a Galaxy A07 (13 times faster than Rhino, working memory limit). The full reference is `host-api.md`.
+
+- Plugins talk to the app only through the host API: read the scene and selection, write keyframes and effects (same operations as recipe steps). The app draws forms from the declared inputs.
 - No access to files, network, OS, or Java classes. Anything not in the host API does not exist for the script.
-- Runtime limits: an instruction/time budget per call, enforced by a hook; going over stops the script and rolls back the edit.
-- Script edits also go through one undo step per user action.
+- Limits: 15 seconds, 64 MB, 256 KB stack, 20,000 keyframes per run; going over stops the script and nothing is changed.
+- A run is one undo step. If the project changes while the script runs, the result is discarded.
+- Windows on ARM has no QuickJS desktop library, so scripts are unavailable there.
 
 ### Repos
 
@@ -133,7 +135,7 @@ backdrop/blur/glyph passes, puppet, particles) stay built-in only.
 
 1. F (manifest, validator, Manager screen, recipe runner) with one sample recipe plugin.
 2. A (effect packs into the catalog) with one sample effect plugin.
-3. B (Lua host and API) with one sample script plugin.
+3. B (JavaScript host and API) with sample script plugins.
 
 Each step is shippable on its own.
 
@@ -146,7 +148,7 @@ Each step is shippable on its own.
 
 ## My calls (change any of these)
 
-- Lua via LuaJ for scripts.
+- JavaScript via QuickJS for scripts (replaces the earlier Lua via LuaJ plan).
 - Side-load from a `.zip` only; no store.
 - Permissions exist in the manifest and are shown at install, but v1 grants none.
 - One undo step and all-or-nothing rollback per run.

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "AbsentMotion plugin manifest (host API 1)",
+  "title": "AbsentMotion plugin manifest (host API 1 and 2)",
   "type": "object",
   "required": ["id", "name", "version", "api", "permissions", "contributes"],
   "properties": {
@@ -13,13 +13,13 @@
     "version": { "type": "string", "pattern": "\\S" },
     "api": {
       "type": "integer",
-      "const": 1,
-      "description": "Host API version. The app requires an exact match."
+      "enum": [1, 2],
+      "description": "Host API version. 1 allows recipes and effects; 2 also allows scripts. The app supports both."
     },
     "permissions": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "Shown at install. Version 1 of the host grants none."
+      "description": "Shown at install. The host grants none yet."
     },
     "contributes": {
       "type": "object",
@@ -36,14 +36,18 @@
         },
         "scripts": {
           "type": "array",
-          "maxItems": 0,
-          "items": { "$ref": "#/$defs/packagePath" },
-          "description": "Scripts are not supported yet; the app rejects a package that lists any."
+          "items": { "$ref": "#/$defs/scriptPath" },
+          "description": "Paths of JavaScript files inside the package. Needs api 2."
         }
       }
     }
   },
   "$defs": {
+    "scriptPath": {
+      "type": "string",
+      "pattern": "^(?![A-Za-z]:)(?!/)(?!.*\\\\)(?!(?:.*/)?\\.\\.(?:/|$)).+\\.js$",
+      "description": "Relative path with forward slashes that stays inside the package and ends in .js."
+    },
     "packagePath": {
       "type": "string",
       "pattern": "^(?![A-Za-z]:)(?!/)(?!.*\\\\)(?!(?:.*/)?\\.\\.(?:/|$)).+$",

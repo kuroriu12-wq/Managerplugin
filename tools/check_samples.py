@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -65,6 +67,32 @@ def recipe_problems(recipe):
     return problems
 
 
+def rule_problems(manifest):
+    problems = schema_problems("manifest.schema.json", manifest)
+    if not problems and manifest["contributes"].get("scripts") and manifest["api"] < 2:
+        problems.append("api: scripts need api 2")
+    return problems
+
+
+NODE = shutil.which("node")
+NOTICE = []
+
+
+def script_problems(path):
+    source = path.read_text(encoding="utf-8-sig")
+    problems = []
+    if "defineScript(" not in source:
+        problems.append("never calls defineScript")
+    if NODE:
+        run = subprocess.run([NODE, "--check", str(path)], capture_output=True, text=True)
+        if run.returncode != 0:
+            lines = [line for line in run.stderr.splitlines() if line.strip()]
+            problems.append("syntax: " + (lines[-1] if lines else "node --check failed"))
+    elif not NOTICE:
+        NOTICE.append("node is not on the path: script syntax was not checked")
+    return problems
+
+
 def effect_problems(folder, key):
     path = folder / f"{key}.json"
     if not path.is_file():
@@ -83,7 +111,7 @@ def effect_problems(folder, key):
 
 
 def manifest_problems(manifest, base):
-    problems = schema_problems("manifest.schema.json", manifest)
+    problems = rule_problems(manifest)
     if problems:
         return problems
     contributes = manifest["contributes"]
@@ -97,6 +125,12 @@ def manifest_problems(manifest, base):
         except ValueError as e:
             found = [f"not valid JSON: {e}"]
         problems += [f"{rel}: {p}" for p in found]
+    for rel in contributes.get("scripts", []):
+        path = base / rel
+        if not path.is_file():
+            problems.append(f"{rel} is missing")
+            continue
+        problems += [f"{rel}: {p}" for p in script_problems(path)]
     keys = contributes.get("effects", [])
     if keys:
         index = base / "effects" / "index.json"
@@ -138,12 +172,14 @@ def main():
         if "steps" in data:
             problems = recipe_problems(data)
         else:
-            problems = schema_problems("manifest.schema.json", data)
+            problems = rule_problems(data)
         if problems:
             print(f"ok   {fixture.name} is invalid, as expected: {problems[0]}")
         else:
             print(f"FAIL {fixture.name} should be invalid but passed")
             failed = True
+    if NOTICE:
+        print("note " + NOTICE[0])
     if not list(FIXTURES.glob("bad_*.json")):
         print("FAIL no negative fixtures found")
         failed = True

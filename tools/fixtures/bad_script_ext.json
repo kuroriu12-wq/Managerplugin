@@ -1,0 +1,14 @@
+{
+  "id": "kuep.badext",
+  "name": "Bad Ext",
+  "version": "1.0",
+  "api": 2,
+  "permissions": [],
+  "contributes": {
+    "recipes": [],
+    "effects": [],
+    "scripts": [
+      "scripts/a.txt"
+    ]
+  }
+}

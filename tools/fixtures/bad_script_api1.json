@@ -1,0 +1,14 @@
+{
+  "id": "kuep.badscript",
+  "name": "Bad Script",
+  "version": "1.0",
+  "api": 1,
+  "permissions": [],
+  "contributes": {
+    "recipes": [],
+    "effects": [],
+    "scripts": [
+      "scripts/a.js"
+    ]
+  }
+}

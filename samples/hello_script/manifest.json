@@ -1,0 +1,14 @@
+{
+  "id": "kuep.helloscript",
+  "name": "Hello Script",
+  "version": "1.0",
+  "api": 2,
+  "permissions": [],
+  "contributes": {
+    "recipes": [],
+    "effects": [],
+    "scripts": [
+      "scripts/nudge.js"
+    ]
+  }
+}
