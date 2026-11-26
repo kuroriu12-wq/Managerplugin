@@ -227,10 +227,41 @@ function makeBody(layer, index, setup) {
     touching: false,
   };
   let area;
+  body.ox = 0;
+  body.oy = 0;
   if (size === null) {
-    body.circle = true;
-    body.r = setup.fallbackRadius;
-    area = Math.PI * body.r * body.r;
+    const box = layer.bounds();
+    if (box === null) {
+      body.circle = true;
+      body.r = setup.fallbackRadius;
+      area = Math.PI * body.r * body.r;
+      body.note = "no size known, treated as a circle of radius " + Math.round(body.r);
+    } else {
+      const c = Math.abs(Math.cos(body.angle));
+      const s = Math.abs(Math.sin(body.angle));
+      const spanX = Math.max(box.right - box.left, 1);
+      const spanY = Math.max(box.bottom - box.top, 1);
+      const det = c * c - s * s;
+      let width = Math.abs(det) < 0.05 ? (spanX + spanY) / (2 * (c + s)) : (spanX * c - spanY * s) / det;
+      let height = Math.abs(det) < 0.05 ? width : (spanY * c - spanX * s) / det;
+      if (!(width >= 1 && height >= 1)) {
+        width = spanX;
+        height = spanY;
+      }
+      body.circle = false;
+      body.hw = width / 2;
+      body.hh = height / 2;
+      area = width * height;
+      const dx = (box.left + box.right) / 2 - at.x;
+      const dy = (box.top + box.bottom) / 2 - at.y;
+      const cos = Math.cos(body.angle);
+      const sin = Math.sin(body.angle);
+      body.ox = dx * cos + dy * sin;
+      body.oy = -dx * sin + dy * cos;
+      body.x = at.x + dx;
+      body.y = at.y + dy;
+      body.note = "box " + Math.round(width) + " x " + Math.round(height) + ", measured from its outline";
+    }
   } else {
     const width = Math.max(size.width * Math.abs(scale.x), 1);
     const height = Math.max(size.height * Math.abs(scale.y), 1);
@@ -238,10 +269,12 @@ function makeBody(layer, index, setup) {
     if (body.circle) {
       body.r = width / 2;
       area = Math.PI * body.r * body.r;
+      body.note = "circle of radius " + Math.round(body.r);
     } else {
       body.hw = width / 2;
       body.hh = height / 2;
       area = width * height;
+      body.note = "box " + Math.round(width) + " x " + Math.round(height);
     }
   }
   body.bound = body.circle ? body.r : Math.hypot(body.hw, body.hh);
@@ -318,6 +351,12 @@ function step(bodies, walls, dt, world) {
   }
 }
 
+function anchor(body) {
+  const c = Math.cos(body.angle);
+  const s = Math.sin(body.angle);
+  return { x: body.x - (body.ox * c - body.oy * s), y: body.y - (body.ox * s + body.oy * c) };
+}
+
 function frameTimes(duration, fps, every) {
   const times = [];
   const spacing = every / fps;
@@ -335,6 +374,7 @@ function advance(bodies, walls, from, to, quality, world) {
 defineScript({
   id: "physics2d",
   name: "Physics 2D",
+  description: "Select two or more layers. They fall, bounce and collide, and the result is baked into keyframes.",
   inputs: [
     { id: "gravity", label: "Gravity (screen heights per second squared)", type: "number", default: 3, min: 0, max: 40 },
     { id: "restitution", label: "Bounciness (0 to 1)", type: "number", default: 0.5, min: 0, max: 1 },
@@ -393,12 +433,16 @@ defineScript({
     if (input.right) walls.push({ nx: 1, ny: 0, d: width });
     if (input.ceiling) walls.push({ nx: 0, ny: -1, d: 0 });
     const bodies = layers.map((layer, index) => makeBody(layer, index, setup));
-    const track = bodies.map((body) => ({ x: [body.x], y: [body.y], angle: [body.angle * 180 / Math.PI] }));
+    const track = bodies.map((body) => {
+      const at = anchor(body);
+      return { x: [at.x], y: [at.y], angle: [body.angle * 180 / Math.PI] };
+    });
     for (let i = 1; i < times.length; i++) {
       advance(bodies, walls, times[i - 1], times[i], quality, world);
       bodies.forEach((body, n) => {
-        track[n].x.push(body.x);
-        track[n].y.push(body.y);
+        const at = anchor(body);
+        track[n].x.push(at.x);
+        track[n].y.push(at.y);
         track[n].angle.push(body.angle * 180 / Math.PI);
       });
     }
@@ -407,6 +451,7 @@ defineScript({
       body.layer.setKeys("position", times, points);
       body.layer.setKeys("rotation", times, track[n].angle);
     });
+    bodies.forEach((body) => ctx.log((body.layer.name || body.layer.kind) + ": " + body.note));
     ctx.log("Baked " + bodies.length + " layer(s), " + times.length + " keyframes each, over " + duration.toFixed(2) + " s");
   }
 });

@@ -1,6 +1,7 @@
 defineScript({
   id: "nudge",
   name: "Nudge",
+  description: "Moves the selected layers by a fixed amount over time.",
   inputs: [
     { id: "dx", label: "Move right (pixels)", type: "number", default: 100, min: -5000, max: 5000 },
     { id: "dy", label: "Move down (pixels)", type: "number", default: 0, min: -5000, max: 5000 },

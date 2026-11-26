@@ -10,6 +10,9 @@
       "description": "owner.name, lowercase letters, digits and underscores. The prefix 'absent.' is reserved for built-ins."
     },
     "name": { "type": "string", "pattern": "\\S" },
+    "description": { "type": "string", "maxLength": 300, "description": "Shown under the plugin name on the Plugins screen." },
+    "author": { "type": "string", "maxLength": 80 },
+    "homepage": { "type": "string", "pattern": "^https://", "maxLength": 200 },
     "version": { "type": "string", "pattern": "\\S" },
     "api": {
       "type": "integer",

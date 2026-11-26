@@ -1,6 +1,8 @@
 {
   "id": "kuep.helloscript",
   "name": "Hello Script",
+  "description": "A small example script: moves the selected layers by an amount you choose.",
+  "author": "Kuep",
   "version": "1.0",
   "api": 2,
   "permissions": [],

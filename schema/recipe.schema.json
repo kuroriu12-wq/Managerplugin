@@ -6,6 +6,7 @@
   "properties": {
     "id": { "type": "string", "pattern": "\\S" },
     "name": { "type": "string", "pattern": "\\S" },
+    "description": { "type": "string", "maxLength": 200, "description": "Shown under the recipe name in the tool list." },
     "inputs": {
       "type": "array",
       "items": { "$ref": "#/$defs/input" }

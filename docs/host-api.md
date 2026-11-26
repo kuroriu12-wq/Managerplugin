@@ -42,7 +42,8 @@ defineScript({
 | `id`, `kind`, `name`, `locked` | Layer id, kind (`shape`, `text`, `drawing`, `embedScene`, `camera`, `audio`, `nullobj`, `model`, `light`), label, lock state. |
 | `shape` | The shape id for shape layers (for example `.circle`, `.rect`, `.star`), empty text for other kinds. |
 | `start`, `finish` | Scene time in seconds. |
-| `size()` | `{ width, height }` for shape layers, `null` for every other kind. The app has no bounds call for text or media yet. |
+| `size()` | `{ width, height }` for shape layers that have a size (rectangles, circles, rounded rectangles), `null` for every other layer. |
+| `bounds()` | `{ left, top, right, bottom }`: the box around the layer as drawn at its start, in scene pixels, rotation and scale included. `null` when the app could not measure it. |
 | `position(t)` | `{ x, y }` at `t` seconds after the layer start. |
 | `rotation(t)` | Degrees at `t` seconds after the layer start. |
 | `scale(t)` | `{ x, y }` scale factor at `t` seconds after the layer start. |

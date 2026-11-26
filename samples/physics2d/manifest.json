@@ -1,12 +1,16 @@
 {
   "id": "kuep.physics2d",
   "name": "Physics 2D",
+  "description": "Makes layers fall, bounce and collide, then saves the motion as keyframes.",
+  "author": "Kuep",
   "version": "1.0",
   "api": 2,
   "permissions": [],
   "contributes": {
     "recipes": [],
     "effects": [],
-    "scripts": ["scripts/physics2d.js"]
+    "scripts": [
+      "scripts/physics2d.js"
+    ]
   }
 }
