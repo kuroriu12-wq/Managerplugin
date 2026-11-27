@@ -45,7 +45,7 @@ defineScript({
 | `size()` | `{ width, height }` for shape layers that have a size (rectangles, circles, rounded rectangles), `null` for every other layer. |
 | `bounds()` | `{ left, top, right, bottom }`: the box around the layer as drawn at its start, in scene pixels, rotation and scale included. `null` when the app could not measure it. |
 | `position(t)` | `{ x, y }` at `t` seconds after the layer start. |
-| `rotation(t)` | Degrees at `t` seconds after the layer start. |
+| `rotation(t)` | Degrees at `t` seconds after the layer start. Counter-clockwise is positive, like the Rotation field in the app. |
 | `scale(t)` | `{ x, y }` scale factor at `t` seconds after the layer start. |
 | `setKeys(property, times, values)` | Replace the keyframes of `"position"`, `"rotation"`, `"scale"` or `"opacity"`. |
 | `addEffect(effectId, { param: value })` | Add an effect to the end of the stack, with optional parameter values. |
@@ -57,7 +57,7 @@ Effect operations are the recipe operations, so effect ids, parameters, ranges a
 ### Coordinates and units (read from the app and pinned by tests)
 
 - Position is in scene pixels. The origin is the top left of the scene and **y grows downward**. A position can be outside the frame.
-- Rotation is in degrees, clockwise positive, the same as the Rotation field in the app. (The file stores the negative value; the host converts both ways.)
+- Rotation is in degrees, counter-clockwise positive, the same as the Rotation field in the app: 30 turns the layer 30 degrees to the left. (The file stores the negative value; the host converts both ways.) A script that wants clockwise angles negates the value.
 - Scale is a factor: `1` is 100 percent. A number scales both axes; `{ x, y }` scales them separately.
 - Opacity is 0 to 1.
 - All times in handle methods are seconds from the layer start, not from the scene start. `start` and `finish` are the only scene-time values.

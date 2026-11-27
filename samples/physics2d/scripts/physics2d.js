@@ -212,12 +212,12 @@ function makeBody(layer, index, setup) {
   const scale = layer.scale(0);
   const at = layer.position(0);
   const later = setup.inherit ? layer.position(setup.probe) : at;
-  const turn = setup.inherit ? (layer.rotation(setup.probe) - layer.rotation(0)) * Math.PI / 180 / setup.probe : 0;
+  const turn = setup.inherit ? -(layer.rotation(setup.probe) - layer.rotation(0)) * Math.PI / 180 / setup.probe : 0;
   const body = {
     layer,
     x: at.x,
     y: at.y,
-    angle: layer.rotation(0) * Math.PI / 180,
+    angle: -layer.rotation(0) * Math.PI / 180,
     vx: setup.pushX + (later.x - at.x) / setup.probe,
     vy: setup.pushY + (later.y - at.y) / setup.probe,
     w: setup.spin + turn,
@@ -386,7 +386,7 @@ defineScript({
     { id: "pin", label: "Pin the first selected layer", type: "switch", default: false },
     { id: "pushX", label: "Push right (screen heights per second)", type: "number", default: 0, min: -20, max: 20 },
     { id: "pushY", label: "Push down (screen heights per second)", type: "number", default: 0, min: -20, max: 20 },
-    { id: "spin", label: "Spin (degrees per second)", type: "number", default: 0, min: -3600, max: 3600 },
+    { id: "spin", label: "Spin (degrees per second, clockwise)", type: "number", default: 0, min: -3600, max: 3600 },
     { id: "inherit", label: "Start with the layer's existing motion", type: "switch", default: false },
     { id: "fallbackRadius", label: "Radius for layers without a size (screen height fraction)", type: "number", default: 0.05, min: 0.005, max: 0.5 },
     { id: "quality", label: "Quality", type: "choice", default: "normal", options: ["fast", "normal", "high"] },
@@ -435,7 +435,7 @@ defineScript({
     const bodies = layers.map((layer, index) => makeBody(layer, index, setup));
     const track = bodies.map((body) => {
       const at = anchor(body);
-      return { x: [at.x], y: [at.y], angle: [body.angle * 180 / Math.PI] };
+      return { x: [at.x], y: [at.y], angle: [-body.angle * 180 / Math.PI] };
     });
     for (let i = 1; i < times.length; i++) {
       advance(bodies, walls, times[i - 1], times[i], quality, world);
@@ -443,7 +443,7 @@ defineScript({
         const at = anchor(body);
         track[n].x.push(at.x);
         track[n].y.push(at.y);
-        track[n].angle.push(body.angle * 180 / Math.PI);
+        track[n].angle.push(-body.angle * 180 / Math.PI);
       });
     }
     bodies.forEach((body, n) => {

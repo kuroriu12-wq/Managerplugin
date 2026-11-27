@@ -20,7 +20,7 @@ The simulation runs for the length of the shortest selected layer.
 | Floor, Left wall, Right wall, Ceiling | Which edges of the frame are solid | floor, left, right |
 | Pin the first selected layer | The first selected layer never moves; others collide with it | off |
 | Push right, Push down | Starting speed for every layer, screen heights per second | 0 |
-| Spin | Starting rotation speed, degrees per second | 0 |
+| Spin | Starting rotation speed, degrees per second, positive turns clockwise | 0 |
 | Start with the layer's existing motion | Use the speed and spin the layer already has from its own keyframes at the start | off |
 | Radius for layers without a size | Screen height fraction, used only when the layer has neither a size nor a measured outline | 0.05 |
 | Quality | fast (1/60 s steps), normal (1/120), high (1/240) | normal |
@@ -30,7 +30,7 @@ The simulation runs for the length of the shortest selected layer.
 
 - A shape layer whose shape is a circle and whose size is square is a circle. Any other shape layer is a box of its size (the layer's scale is applied). A layer without a size (a star, a drawn shape, text) is a box measured from its outline with `bounds()`. Only when that measurement is missing is it a circle of the fallback radius.
 - Mass follows area. Semi-implicit Euler, impulse contacts with Coulomb friction, 6 solver iterations, positional correction, sleeping after half a second of rest. No randomness: the same input gives the same result.
-- Position is in scene pixels with y downward; rotation is clockwise degrees (see `host-api.md`).
+- Position is in scene pixels with y downward; rotation in the API is counter-clockwise degrees (see `host-api.md`); the script converts it so the collision boxes match what is drawn.
 
 ## Limits
 
